@@ -66,16 +66,16 @@
   - `cell_box.json`：文字區塊位置／欄位資訊  
   - `html.json`：對應的文字內容  
   - 以及來自前一步「收貨單比對」或內部系統的 **採購清單**
-- **處理流程（Process）**  
+- **處理流程**  
   - Gemma3 VLM 同時接收：
     - 實際貨物影像
     - OCR 的 JSON
     - 預期應該出現的品項（如：品名、規格、數量）
   - 透過改寫後的 prompt，要求模型判斷：
     - 「實際看到的貨物」是否與「清單上的項目」一致  
-    - 是否有 **缺件、超件或品項不符**
+    - 是否有 **缺件或品項不符**
 
-- **輸出（Output）**  
+- **輸出**  
   - 以 **JSON-only** 格式輸出驗貨結果，例如：
     ```jsonc
     {
@@ -85,8 +85,7 @@
           "預期規格": "string",
           "實際辨識品名": "string or null",
           "實際辨識規格": "string or null",
-          "是否一致": "match / mismatch / uncertain",
-          "說明": "string (optional)"
+          "是否一致": "match / mismatch / unknown",
         }
       ]
     }
