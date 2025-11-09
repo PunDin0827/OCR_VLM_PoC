@@ -1,10 +1,8 @@
 # Gemma3 VLM for OCR + Visual Inspection（看圖驗貨系統）
 
-> 使用 **Gemma3 Vision-Language Model (VLM)** 結合 **OCR + 圖片輸入**，協助收貨/倉儲人員「看圖驗貨」，自動比對收貨單與實際貨品狀態。  
-> *Gemma3 VLM + OCR pipeline to verify delivery notes against real product images.*
+> 使用 **Gemma3 Vision-Language Model (VLM)** 結合 **OCR + 圖片輸入**，協助收貨人員「看圖驗貨」，自動比對收貨單與實際貨品狀態。  
 
-> 🛠 **Project status：Work In Progress (WIP)** — 目前仍在開發中，API 介面與模組設計可能會調整。  
-> *This project is under active development; APIs and module design may change.*
+> 目前仍在開發中，API 介面與模組設計可能會調整。  
 
 ---
 
