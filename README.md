@@ -1,82 +1,44 @@
-# Gemma3 + Paddle OCR：貨物驗收核對系統
+# Gemma3 + Paddle OCR：貨物驗收核對系統  
 
-使用 **Gemma3 Vision-Language Model (VLM)** 結合 **OCR + 圖片輸入**，協助收貨人員「看圖驗貨」，自動比對收貨單與實際貨品狀態。  
-
-> 目前仍在開發中，API 介面與模組設計可能會調整。  
+使用 Gemma3 VLM 結合 OCR 輸出，  
+將收貨單影像整理成結構化 JSON，並用模糊比對（fuzzy matching）對應到實際採購料表。
 
 ---
 
 ## 1. 專案簡介
 
-從「收貨單影像 + 貨品實拍照片」產生可用於驗收的結構化資訊，並將結果與專案採購清單進行比對，協助人員快速發現以下問題：
+處理流程：
 
-- 收貨單上的品名、數量、序號與實際貨物不一致  
-- 收貨單上的內容與實際採購項目不一致
-
-單據上資訊模糊/手寫/拍攝角度不佳時，提供 VLM 輔助判讀
-
+1. 先用 OCR 系統對收貨單影像做偵測與辨識，產生：
+   - `cell_box.json`：每個欄位／儲存格的位置資訊（版面結構）。
+   - `html.json`：對應的文字內容。
+2. 獲得 OCR 輸出結果之後：
+   - 使用 Gemma3 VLM + 圖片輸入 + OCR JSON，請模型輸出整理好的表格 JSON，例如：
+     - PO 單號  
+     - 品名、規格、數量、價錢
+   - 使用 `rapidfuzz` 將這些品名／規格與一份模擬資料表 (`db_table`) 做模糊比對，計算相似度分數。
 ---
 
-## 2. 核心功能 
+## 2. 目前功能 (What is implemented)
 
-### 2.1 OCR 結構化欄位萃取
+### 2.1 VLM + OCR → 結構化 JSON
 
--  從收貨單影像中萃取：  
-  - 品名
-  - 規格
-  - 數量
-  - 價錢 
-- 轉為結構化 JSON / 表格格式，方便後續比對。  
+Notebook `Gemma3.ipynb` 內主要流程：
 
-### 2.2 VLM 圖文交叉驗證
+- 載入 OCR JSON：
+  - `cell_box.json`：欄位座標、表格結構。
+  - `html.json`：欄位文字內容。
+- 建立 prompt，要求 Gemma3 只輸出 JSON，格式大致如下（示意）：
 
-- 將 **收貨單影像 + OCR 文本 + 貨品照片** 一併輸入 Gemma3 VLM。  
-- 請 VLM 回答：「實際貨品是否與收貨單描述相符？是否有缺漏或多收？」  
-- 透過 prompt 設計降低 hallucination，要求模型務必標註「不確定」情況。  
-
-### 2.3 與採購清單的模糊比對 (Fuzzy Matching with Purchase List)
-
-- ✅ 將 OCR 產生的結構化欄位與資料庫中的採購明細做比對。  
-- ✅ 使用字串相似度 / token-based similarity 做 **模糊匹配 (fuzzy matching)**。  
-  - 例如：Levenshtein distance、Jaro-Winkler、或 embedding-based similarity。  
-- ✅ 為每一列產生匹配分數（0.0–1.0），標示：  
-  - 高風險不一致（紅色標註）  
-  - 可疑 / 需人工確認（黃色）  
-  - 正常匹配（綠色）  
-  *Compare extracted fields against purchase records using fuzzy string or embedding-based similarity, and compute a risk score per line item.*
-
-### 2.4 看圖驗貨輔助 (Visual Inspection Assistant)
-
-- ✅ 從貨品影像中抽取：型號標籤、規格文字、外觀特徵等。  
-- ✅ 搭配收貨單 OCR 結果，一併輸入 VLM，請模型回答：  
-  - 「圖片中顯示的貨品是否為 XXX 型號？有看到幾個？是否包含附件/配件？」  
-- ☐ 規劃加入「多張圖整合」：同一批貨多張照片交由 VLM 做整體判斷。  
-  *Let the VLM inspect product photos and verify whether they match the ordered model/spec and quantity.*
-
----
-
-## 3. 系統架構 (System Architecture)
-
-```text
-[收貨單影像]       [貨品實拍影像]
-      │                │
-      │                ├───────────┐
-      │                            │
-[OCR 模組]                          
-(文字偵測 + 辨識)                   │
-      │                            │
-      ↓                            │
-[結構化欄位抽取]                    │
-(item_name, quantity, SN, date, ...│
-      │                             │
-      ├──────────────┐              │
-      │              │              │
-      ↓              ↓              ↓
-[採購清單資料庫]  [VLM：Gemma3 + 圖片 + OCR 文本]
-      │              │
-      │              └──→ 圖文一致性判斷 (consistency check)
-      ↓
-[模糊匹配 / 風險評分引擎]
-      ↓
-[驗收報表 / Dashboard 輸出]
-(高風險項目標記、建議人工覆核)
+```jsonc
+{
+  "PO單號": "string or null",
+  "品名與規格": [
+    {
+      "品名": "string or null",
+      "規格": "string or null",
+      "數量": "string or null",
+      "價錢": "string or null"
+    }
+  ]
+}
