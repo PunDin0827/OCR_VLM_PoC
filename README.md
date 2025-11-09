@@ -63,14 +63,6 @@
     - 空白、底線、斜線等格式差異（format variation）  
     - 文字略有錯字或不同寫法的情況。
 
-- **本地模型部署 (local deployment)**  
-  - 使用 `llama_cpp.Llama` 載入：
-    - `gemma-3-12b-it-q4_0.gguf`：主模型  
-    - `mmproj-model-f16-12B.gguf`：多模態投影（vision encoder）  
-  - 支援：
-    - `n_gpu_layers = -1`：視硬體自動選擇放到 GPU 的層數  
-    - `flash_attn = True`：啟用 flash attention 提升推論效率（如果環境支援）。  
-
 ---
 
 ## 3. 系統架構 (Architecture)
