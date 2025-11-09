@@ -6,7 +6,7 @@
 
 ---
 
-## 1. 專案簡介 (Overview)
+## 1. 專案簡介
 
 從「收貨單影像 + 貨品實拍照片」產生可用於驗收的結構化資訊，並將結果與專案採購清單進行比對，協助人員快速發現以下問題：
 
@@ -17,25 +17,22 @@
 
 ---
 
-## 2. 核心功能 (Core Features)
+## 2. 核心功能 
 
-> ✅：已規劃並有初步實作　　☐：尚未完成 / 計畫中
+### 2.1 OCR 結構化欄位萃取
 
-### 2.1 OCR 結構化欄位萃取 (Structured OCR Extraction)
+-  從收貨單影像中萃取：  
+  - 品名
+  - 規格
+  - 數量
+  - 價錢 
+- 轉為結構化 JSON / 表格格式，方便後續比對。  
 
-- ✅ 從收貨單影像中萃取：  
-  - 品名（item name / description）  
-  - 數量（quantity）  
-  - 序號 / 批號（serial / lot number）  
-  - 日期（date / delivery date）  
-- ✅ 轉為結構化 JSON / 表格格式，方便後續比對。  
+### 2.2 VLM 圖文交叉驗證
 
-### 2.2 VLM 圖文交叉驗證 (Cross-check with VLM: Image + Text)
-
-- ✅ 將 **收貨單影像 + OCR 文本 + 貨品照片** 一併輸入 Gemma3 VLM。  
-- ✅ 請 VLM 回答：「實際貨品是否與收貨單描述相符？是否有缺漏或多收？」  
-- ✅ 透過 prompt 設計降低 hallucination，要求模型務必標註「不確定」情況。  
-  *Feed both the delivery note and product images plus OCR text into the VLM to verify consistency, with prompt design to reduce hallucinations.*
+- 將 **收貨單影像 + OCR 文本 + 貨品照片** 一併輸入 Gemma3 VLM。  
+- 請 VLM 回答：「實際貨品是否與收貨單描述相符？是否有缺漏或多收？」  
+- 透過 prompt 設計降低 hallucination，要求模型務必標註「不確定」情況。  
 
 ### 2.3 與採購清單的模糊比對 (Fuzzy Matching with Purchase List)
 
